@@ -1,0 +1,707 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Winvest Danışmanlık - Kredi Hesaplama Aracı</title>
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.25/jspdf.plugin.autotable.min.js"></script>
+  <style>
+    @font-face {
+      font-family: 'Arial Unicode';
+      src: local('Arial Unicode MS');
+    }
+    body {
+      font-family: 'Arial Unicode', Arial, sans-serif;
+    }
+    .gold-gradient {
+      background: linear-gradient(135deg, #f5d78e 0%, #d4af37 50%, #f5d78e 100%);
+    }
+    .gold-border {
+      border-color: #d4af37;
+    }
+    .gold-text {
+      color: #d4af37;
+    }
+    .gold-hover:hover {
+      background-color: #d4af37;
+    }
+    .rich-header {
+      background: linear-gradient(135deg, #1a1a1a 0%, #333333 100%);
+    }
+    .logo-container {
+      display: flex;
+      justify-content: center;
+      margin-bottom: 1rem;
+    }
+    .logo-img {
+      height: 80px;
+      object-fit: contain;
+    }
+    .contact-card {
+      background: white;
+      border-radius: 10px;
+      padding: 20px;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      transition: transform 0.3s ease;
+    }
+    .contact-card:hover {
+      transform: translateY(-5px);
+    }
+    .social-btn {
+      display: inline-flex;
+      align-items: center;
+      padding: 10px 15px;
+      margin: 0 5px;
+      border-radius: 6px;
+      color: white;
+      font-weight: bold;
+      text-decoration: none;
+      transition: all 0.3s ease;
+    }
+    .social-btn:hover {
+      transform: scale(1.05);
+      box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+    }
+    .whatsapp {
+      background-color: #25D366;
+    }
+    .instagram {
+      background: linear-gradient(45deg, #405DE6, #5851DB, #833AB4, #C13584, #E1306C, #FD1D1D);
+    }
+    .contact-button {
+      background-color: #d4af37;
+      color: white;
+      padding: 12px 24px;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: bold;
+      margin-top: 15px;
+      transition: all 0.3s ease;
+      display: inline-flex;
+      align-items: center;
+    }
+    .contact-button:hover {
+      background-color: #c19b2e;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    }
+    .contact-icon {
+      margin-right: 8px;
+      font-size: 1.2em;
+    }
+  </style>
+</head>
+<body class="bg-gray-50 text-gray-800">
+  <div class="container mx-auto px-4 py-8 max-w-7xl">
+    <!-- Başlık ve Logo -->
+    <header class="rich-header text-white py-8 rounded-xl shadow-lg mb-10 border-b-4 gold-border">
+      <div class="container mx-auto px-6 text-center">
+        <div class="logo-container">
+          <img src="logo.png" alt="Winvest Danışmanlık Logo" class="logo-img">
+        </div>
+        <h1 class="text-3xl font-bold mb-3">Kredi Hesaplama Aracı</h1>
+        
+      </div>
+    </header>
+
+    <!-- Ana İçerik -->
+    <div class="flex flex-col lg:flex-row gap-8">
+      <!-- Sol Panel - Girdiler -->
+      <div class="lg:w-1/3">
+        <div class="bg-white rounded-xl shadow-md p-6 sticky top-4 border-2 gold-border">
+          <!-- Kredi Türü Seçimi -->
+          <div class="mb-8">
+            <h2 class="text-xl font-semibold mb-4 text-gray-700">Kredi Türü</h2>
+            <div class="grid grid-cols-3 gap-2">
+              <button onclick="setLoanType('konut')" id="btn-konut" class="loan-tab flex flex-col items-center justify-center py-4 px-2 rounded-lg gold-gradient text-white border-2 gold-border transition-all">
+                <i class="fas fa-home text-2xl mb-2"></i>
+                <span>Konut</span>
+              </button>
+              <button onclick="setLoanType('tasit')" id="btn-tasit" class="loan-tab flex flex-col items-center justify-center py-4 px-2 rounded-lg bg-white text-gray-700 border-2 border-gray-300 hover:gold-border transition-all">
+                <i class="fas fa-car text-2xl mb-2"></i>
+                <span>Taşıt</span>
+              </button>
+              <button onclick="setLoanType('ticari')" id="btn-ticari" class="loan-tab flex flex-col items-center justify-center py-4 px-2 rounded-lg bg-white text-gray-700 border-2 border-gray-300 hover:gold-border transition-all">
+                <i class="fas fa-briefcase text-2xl mb-2"></i>
+                <span>Ticari</span>
+              </button>
+            </div>
+          </div>
+          <input type="hidden" id="loanType" value="konut">
+
+          <!-- Kredi Bilgileri Formu -->
+          <div class="space-y-6">
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">Kredi Tutarı</label>
+              <input type="text" id="amount" class="w-full px-4 py-3 rounded-lg border-2 border-gray-300 focus:gold-border focus:ring-2 focus:ring-yellow-200" placeholder="300.000" oninput="formatInput(this)">
+            </div>
+
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">Aylık Kar Oranı (%)</label>
+              <input type="number" id="monthlyRate" step="0.01" class="w-full px-4 py-3 rounded-lg border-2 border-gray-300 focus:gold-border focus:ring-2 focus:ring-yellow-200" placeholder="1.29">
+            </div>
+
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">Vade (Ay)</label>
+              <input type="number" id="term" class="w-full px-4 py-3 rounded-lg border-2 border-gray-300 focus:gold-border focus:ring-2 focus:ring-yellow-200" placeholder="120">
+            </div>
+
+            <button onclick="calculateLoan()" class="w-full gold-gradient hover:gold-hover text-white font-bold py-3 px-4 rounded-lg shadow-md transition duration-300 transform hover:scale-[1.02] flex items-center justify-center space-x-2 border-2 gold-border">
+              <i class="fas fa-calculator"></i>
+              <span>Hesapla</span>
+            </button>
+          </div>
+
+          <!-- Sonuçlar -->
+          <div id="results" class="mt-8 p-5 bg-yellow-50 rounded-lg border-2 gold-border hidden">
+            <h3 class="text-lg font-semibold gold-text mb-3 flex items-center">
+              <i class="fas fa-info-circle mr-2"></i> Kredi Özeti
+            </h3>
+            <div class="space-y-3">
+              <div class="flex justify-between">
+                <span class="text-gray-600">Aylık Taksit:</span>
+                <span id="monthlyPaymentResult" class="font-semibold">0,00</span>
+              </div>
+              <div class="flex justify-between">
+                <span class="text-gray-600">Toplam Ödeme:</span>
+                <span id="totalPaymentResult" class="font-semibold">0,00</span>
+              </div>
+              <div class="flex justify-between">
+                <span class="text-gray-600">Toplam Kar:</span>
+                <span id="totalInterestResult" class="font-semibold">0,00</span>
+              </div>
+              <div class="flex justify-between">
+                <span class="text-gray-600">Aylık Maliyet Oranı:</span>
+                <span id="monthlyCostRate" class="font-semibold">0,00%</span>
+              </div>
+              <div class="flex justify-between">
+                <span class="text-gray-600">Yıllık Maliyet Oranı:</span>
+                <span id="annualCostRate" class="font-semibold">0,00%</span>
+              </div>
+              <div id="taxesInfo" class="pt-3 mt-3 border-t-2 gold-border hidden">
+                <div class="flex justify-between">
+                  <span class="text-gray-600">KKDF (15%):</span>
+                  <span id="kkdfResult" class="font-semibold">0,00</span>
+                </div>
+                <div class="flex justify-between">
+                  <span class="text-gray-600">BSMV (5%):</span>
+                  <span id="bsmvResult" class="font-semibold">0,00</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Sağ Panel - Sonuçlar -->
+      <div class="lg:w-2/3 space-y-6">
+        <!-- Ödeme Planı -->
+        <div id="paymentScheduleContainer" class="bg-white rounded-xl shadow-md p-6 hidden border-2 gold-border">
+          <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 gap-3">
+            <h2 class="text-xl font-semibold gold-text">Ödeme Planı</h2>
+            <div class="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
+              <div class="relative w-full sm:w-48">
+                <label class="sr-only">Göster</label>
+                <select id="scheduleFilter" class="w-full pl-3 pr-8 py-2 border-2 rounded-lg appearance-none bg-white focus:outline-none focus:ring-2 focus:ring-yellow-200 focus:gold-border">
+                  <option value="all">Tüm Ödemeler</option>
+                  <option value="first12">İlk 12 Ay</option>
+                  <option value="last12">Son 12 Ay</option>
+                  <option value="yearly">Yıllık Özet</option>
+                </select>
+                <div class="absolute inset-y-0 right-0 flex items-center pr-2 pointer-events-none">
+                  <i class="fas fa-chevron-down text-gray-400"></i>
+                </div>
+              </div>
+              <button onclick="exportToPDF()" class="w-full sm:w-auto gold-gradient hover:gold-hover text-white px-4 py-2 rounded-lg flex items-center justify-center space-x-2 border-2 gold-border">
+                <i class="fas fa-file-pdf"></i>
+                <span>PDF Olarak Kaydet</span>
+              </button>
+              <button onclick="sendEmailWithPDF()" class="w-full sm:w-auto bg-gray-800 hover:bg-gray-900 text-white px-4 py-2 rounded-lg flex items-center justify-center space-x-2 border-2 border-gray-700">
+                <i class="fas fa-envelope"></i>
+                <span>E-Posta ile Gönder</span>
+              </button>
+            </div>
+          </div>
+          
+          <div class="overflow-x-auto">
+            <table class="min-w-full text-sm border-2 rounded-lg overflow-hidden gold-border">
+              <thead>
+                <tr class="bg-gray-800 text-white text-left">
+                  <th class="px-4 py-3 font-semibold">Ay</th>
+                  <th class="px-4 py-3 font-semibold">Taksit</th>
+                  <th class="px-4 py-3 font-semibold">Anapara</th>
+                  <th class="px-4 py-3 font-semibold">Kar</th>
+                  <th class="px-4 py-3 font-semibold">Kalan</th>
+                </tr>
+              </thead>
+              <tbody id="scheduleBody" class="divide-y divide-gray-200"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- İletişim Bilgileri -->
+    <section id="iletisim" class="mt-12">
+      <h2 class="text-2xl font-bold gold-text mb-6 text-center">İletişim Bilgileri</h2>
+      <div class="grid md:grid-cols-2 gap-6">
+        <div class="contact-card">
+          <h3 class="text-xl font-semibold mb-4 gold-text"><i class="fas fa-phone-alt contact-icon"></i>Telefon</h3>
+          <div class="space-y-3">
+            <p class="flex items-center">
+              <i class="fas fa-user mr-2 text-gray-600"></i>
+              <span class="font-medium">İlhami ONAY:</span>
+              <a href="tel:05074161424" class="ml-2 text-blue-600 hover:underline">0507 416 1424</a>
+            </p>
+            <p class="flex items-center">
+              <i class="fas fa-user mr-2 text-gray-600"></i>
+              <span class="font-medium">Rifat ARSLAN:</span>
+              <a href="tel:05053049918" class="ml-2 text-blue-600 hover:underline">0505 304 9918</a>
+            </p>
+          </div>
+        </div>
+        
+        <div class="contact-card">
+          <h3 class="text-xl font-semibold mb-4 gold-text"><i class="fas fa-envelope contact-icon"></i>E-posta & Sosyal Medya</h3>
+          <p class="mb-4 flex items-center">
+            <i class="fas fa-at mr-2 text-gray-600"></i>
+            <a href="mailto:winvestdanismanlik@gmail.com" class="text-blue-600 hover:underline">winvestdanismanlik@gmail.com</a>
+          </p>
+          <div class="flex flex-wrap gap-3 mt-4">
+            <a href="https://wa.me/905074161424" target="_blank" class="social-btn whatsapp">
+              <i class="fab fa-whatsapp mr-2"></i>WhatsApp
+            </a>
+            <a href="https://www.instagram.com/winvestdanismanlik" target="_blank" class="social-btn instagram">
+              <i class="fab fa-instagram mr-2"></i>Instagram
+            </a>
+          </div>
+          <button class="contact-button" onclick="window.location.href='mailto:winvestdanismanlik@gmail.com'">
+            <i class="fas fa-paper-plane contact-icon"></i>Mail Gönder
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="mt-12 text-center text-gray-600 py-6 border-t border-gray-200">
+      <p>&copy; 2025 Winvest Danışmanlık. Tüm hakları saklıdır.</p>
+    </footer>
+  </div>
+
+  <script>
+    // Global değişkenler
+    let fullSchedule = [];
+    let loanDetails = {};
+    const { jsPDF } = window.jspdf;
+    
+    // Sayfa yüklendiğinde konut kredisi sekmesini aktif et
+    document.addEventListener('DOMContentLoaded', function() {
+      setLoanType('konut');
+      document.getElementById('scheduleFilter').addEventListener('change', filterSchedule);
+    });
+
+    // Formatlama fonksiyonları
+    function formatNumber(num) {
+      return num.toLocaleString('tr-TR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    }
+
+    function parseFormattedNumber(str) {
+      return parseFloat(str.replace(/\./g, '').replace(',', '.'));
+    }
+
+    function formatInput(input) {
+      let value = input.value.replace(/[^\d]/g, '');
+      if (value === '') return input.value = '';
+      input.value = parseInt(value).toLocaleString('tr-TR');
+    }
+
+    // Kredi türü seçimi
+    function setLoanType(type) {
+      document.getElementById('loanType').value = type;
+      document.querySelectorAll('.loan-tab').forEach(btn => {
+        btn.classList.remove('gold-gradient', 'text-white', 'gold-border');
+        btn.classList.add('bg-white', 'text-gray-700', 'border-gray-300');
+      });
+      const activeBtn = document.getElementById('btn-' + type);
+      activeBtn.classList.remove('bg-white', 'text-gray-700', 'border-gray-300');
+      activeBtn.classList.add('gold-gradient', 'text-white', 'gold-border');
+    }
+
+    // Giriş doğrulama
+    function validateInputs() {
+      const amount = document.getElementById("amount").value;
+      const rate = document.getElementById("monthlyRate").value;
+      const term = document.getElementById("term").value;
+      
+      if (!amount || isNaN(parseFormattedNumber(amount))) {
+        showAlert("Lütfen geçerli bir kredi tutarı giriniz", "error");
+        return false;
+      }
+      
+      if (!rate || rate <= 0) {
+        showAlert("Lütfen geçerli bir Kar oranı giriniz", "error");
+        return false;
+      }
+      
+      if (!term || term < 1) {
+        showAlert("Vade en az 1 ay olmalıdır", "error");
+        return false;
+      }
+      
+      return true;
+    }
+
+    // Uyarı gösterme
+    function showAlert(message, type = "success") {
+      const alertDiv = document.createElement('div');
+      alertDiv.className = `fixed top-4 right-4 px-6 py-3 rounded-lg shadow-lg text-white ${
+        type === "error" ? "bg-red-500" : "gold-gradient"
+      } flex items-center justify-between z-50 border-2 gold-border`;
+      alertDiv.innerHTML = `
+        <span>${message}</span>
+        <button onclick="this.parentElement.remove()" class="ml-4">
+          <i class="fas fa-times"></i>
+        </button>
+      `;
+      document.body.appendChild(alertDiv);
+      setTimeout(() => alertDiv.remove(), 5000);
+    }
+
+    // Ödeme planı filtreleme
+    function filterSchedule() {
+      const filter = document.getElementById("scheduleFilter").value;
+      let filtered = [];
+      
+      if (filter === "all") {
+        filtered = fullSchedule;
+      } else if (filter === "first12") {
+        filtered = fullSchedule.slice(0, 12);
+      } else if (filter === "last12") {
+        filtered = fullSchedule.slice(-12);
+      } else if (filter === "yearly") {
+        for (let i = 0; i < fullSchedule.length; i += 12) {
+          const year = fullSchedule.slice(i, i + 12);
+          if (year.length > 0) {
+            const summary = {
+              month: `${i+1}-${i+year.length}`,
+              payment: year[0].payment,
+              principal: year.reduce((sum, m) => sum + m.principal, 0),
+              interest: year.reduce((sum, m) => sum + m.interest, 0),
+              remaining: year[year.length-1].remaining
+            };
+            filtered.push(summary);
+          }
+        }
+      }
+      
+      renderSchedule(filtered);
+    }
+
+    // Ödeme planını render etme
+    function renderSchedule(schedule) {
+      const scheduleBody = document.getElementById("scheduleBody");
+      scheduleBody.innerHTML = "";
+      
+      schedule.forEach(item => {
+        const row = document.createElement('tr');
+        row.className = 'hover:bg-gray-50';
+        row.innerHTML = `
+          <td class="px-4 py-3">${item.month}</td>
+          <td class="px-4 py-3">${formatNumber(item.payment)}</td>
+          <td class="px-4 py-3">${formatNumber(item.principal)}</td>
+          <td class="px-4 py-3">${formatNumber(item.interest)}</td>
+          <td class="px-4 py-3">${formatNumber(item.remaining)}</td>
+        `;
+        scheduleBody.appendChild(row);
+      });
+    }
+
+    // Kredi hesaplama
+    function calculateLoan() {
+      if (!validateInputs()) return;
+      
+      const amount = parseFormattedNumber(document.getElementById("amount").value);
+      const baseRate = parseFloat(document.getElementById("monthlyRate").value) / 100;
+      const term = parseInt(document.getElementById("term").value);
+      const loanType = document.getElementById("loanType").value;
+
+      let effectiveRate = baseRate;
+      const KKDF = 0.15;
+      const BSMV = 0.05;
+      let kkdfAmount = 0;
+      let bsmvAmount = 0;
+
+      if (loanType === "tasit") {
+        kkdfAmount = baseRate * KKDF;
+        bsmvAmount = baseRate * BSMV;
+        effectiveRate = baseRate * (1 + KKDF + BSMV);
+      } else if (loanType === "ticari") {
+        bsmvAmount = baseRate * BSMV;
+        effectiveRate = baseRate * (1 + BSMV);
+      }
+
+      const monthlyPayment = (amount * effectiveRate) / (1 - Math.pow(1 + effectiveRate, -term));
+      const totalPayment = monthlyPayment * term;
+      const totalInterest = totalPayment - amount;
+      
+      // Maliyet oranları hesaplama
+      const monthlyCostRate = effectiveRate * 100;
+      const annualCostRate = (Math.pow(1 + effectiveRate, 12) - 1) * 100;
+
+      // Sonuçları göster
+      document.getElementById("results").classList.remove("hidden");
+      document.getElementById("monthlyPaymentResult").textContent = `${formatNumber(monthlyPayment)}`;
+      document.getElementById("totalPaymentResult").textContent = `${formatNumber(totalPayment)}`;
+      document.getElementById("totalInterestResult").textContent = `${formatNumber(totalInterest)}`;
+      document.getElementById("monthlyCostRate").textContent = `${monthlyCostRate.toFixed(2)}%`;
+      document.getElementById("annualCostRate").textContent = `${annualCostRate.toFixed(2)}%`;
+
+      // Vergi bilgilerini göster/gizle
+      const taxesInfo = document.getElementById("taxesInfo");
+      if (loanType === "tasit" || loanType === "ticari") {
+        taxesInfo.classList.remove("hidden");
+        document.getElementById("kkdfResult").textContent = `${formatNumber(totalInterest * KKDF)}`;
+        document.getElementById("bsmvResult").textContent = `${formatNumber(totalInterest * BSMV)}`;
+      } else {
+        taxesInfo.classList.add("hidden");
+      }
+
+      // Ödeme planını oluştur
+      fullSchedule = [];
+      let remaining = amount;
+
+      for (let i = 1; i <= term; i++) {
+        const interestPayment = remaining * baseRate;
+        let kkdfThisMonth = 0;
+        let bsmvThisMonth = 0;
+
+        if (loanType === "tasit") {
+          kkdfThisMonth = interestPayment * KKDF;
+          bsmvThisMonth = interestPayment * BSMV;
+        } else if (loanType === "ticari") {
+          bsmvThisMonth = interestPayment * BSMV;
+        }
+
+        const totalInterestWithTaxes = interestPayment + kkdfThisMonth + bsmvThisMonth;
+        const principalPayment = monthlyPayment - totalInterestWithTaxes;
+        remaining -= principalPayment;
+
+        fullSchedule.push({
+          month: i,
+          payment: monthlyPayment,
+          principal: principalPayment,
+          interest: totalInterestWithTaxes,
+          remaining: Math.max(remaining, 0)
+        });
+      }
+
+      // Ödeme planını göster
+      document.getElementById("paymentScheduleContainer").classList.remove("hidden");
+      
+      // Ödeme planını render et
+      filterSchedule();
+
+      // Loan details'i güncelle (PDF ve e-posta için)
+      loanDetails = {
+        amount,
+        monthlyRate: baseRate * 100,
+        term,
+        loanType,
+        monthlyPayment,
+        totalPayment,
+        totalInterest,
+        monthlyCostRate,
+        annualCostRate,
+        kkdfTotal: loanType === "tasit" ? totalInterest * KKDF : 0,
+        bsmvTotal: loanType === "tasit" || loanType === "ticari" ? totalInterest * BSMV : 0,
+        calculationDate: new Date().toLocaleDateString('tr-TR', { 
+          day: '2-digit', 
+          month: '2-digit', 
+          year: 'numeric',
+          hour: '2-digit',
+          minute: '2-digit'
+        })
+      };
+
+      showAlert("Kredi hesaplamanız başarıyla tamamlandı");
+    }
+
+    // PDF oluşturma
+    function generatePDF() {
+      return new Promise((resolve) => {
+        const doc = new jsPDF({
+          orientation: 'portrait',
+          unit: 'mm',
+          hotfixes: ['px_scaling']
+        });
+        
+        // Winvest Danismanlik Başlık
+        doc.setFont('calibri', 'normal');
+        doc.setFontSize(16);
+        doc.setTextColor(40, 40, 40);
+        doc.text('Winvest Danismanlik', doc.internal.pageSize.getWidth()/2, 15, { align: 'center' });
+        
+        const title = `${loanDetails.loanType === 'konut' ? 'Konut' : loanDetails.loanType === 'tasit' ? 'Taşıt' : 'Ticari'} Kredisi Ödeme Plani`;
+        
+        // Başlık
+        doc.setFontSize(14);
+        doc.text(title, doc.internal.pageSize.getWidth()/2, 22, { align: 'center' });
+        
+        // Tarih ve bilgiler
+        doc.setFontSize(10);
+        doc.setTextColor(100, 100, 100);
+        doc.text(`Hesaplama Tarihi: ${loanDetails.calculationDate}`, 14, 30);
+        
+        // Kredi bilgileri
+        doc.setFontSize(11);
+        doc.setTextColor(40, 40, 40);
+        doc.text(`Kredi Tutari: ${formatNumber(loanDetails.amount)} TL`, 14, 38);
+        doc.text(`Kar Orani: %${loanDetails.monthlyRate.toFixed(2)}`, 14, 45);
+        doc.text(`Vade: ${loanDetails.term} ay`, 14, 52);
+        
+        // Maliyet oranları
+        doc.text(`Aylik Maliyet Orani: %${loanDetails.monthlyCostRate.toFixed(2)}`, 14, 59);
+        doc.text(`Yillik Maliyet Orani: %${loanDetails.annualCostRate.toFixed(2)}`, 14, 66);
+        
+        // Özet bilgiler
+        doc.text(`Aylik Taksit: ${formatNumber(loanDetails.monthlyPayment)} TL`, 105, 38);
+        doc.text(`Toplam Ödeme: ${formatNumber(loanDetails.totalPayment)} TL`, 105, 45);
+        doc.text(`Toplam Kar: ${formatNumber(loanDetails.totalInterest)} TL`, 105, 52);
+        
+        if (loanDetails.loanType !== 'konut') {
+          doc.text(`BSMV: ${formatNumber(loanDetails.bsmvTotal)} TL`, 105, 59);
+          if (loanDetails.loanType === 'tasit') {
+            doc.text(`KKDF: ${formatNumber(loanDetails.kkdfTotal)} TL`, 105, 66);
+          }
+        }
+        
+        // Ödeme planı tablosu
+        const headers = [['Ay', 'Taksit', 'Anapara', 'Kar', 'Kalan']];
+        
+        // Tüm ödemeleri PDF'e ekle
+        const data = fullSchedule.map(item => [
+          item.month,
+          formatNumber(item.payment) + ' TL',
+          formatNumber(item.principal) + ' TL',
+          formatNumber(item.interest) + ' TL',
+          formatNumber(item.remaining) + ' TL'
+        ]);
+        
+        doc.autoTable({
+          startY: 75,
+          head: headers,
+          body: data,
+          headStyles: {
+            fillColor: [51, 51, 51],
+            textColor: [255, 255, 255],
+            fontStyle: 'bold',
+            font: 'helvetica'
+          },
+          alternateRowStyles: {
+            fillColor: [245, 245, 245]
+          },
+          margin: { top: 75 },
+          styles: {
+            cellPadding: 4,
+            fontSize: 9,
+            valign: 'middle',
+            font: 'helvetica',
+            overflow: 'linebreak',
+            halign: 'right'
+          },
+          columnStyles: {
+            0: { cellWidth: 'auto', halign: 'center' },
+            1: { cellWidth: 'auto' },
+            2: { cellWidth: 'auto' },
+            3: { cellWidth: 'auto' },
+            4: { cellWidth: 'auto' }
+          }
+        });
+        
+        // İletişim bilgileri
+        doc.setFontSize(10);
+        doc.setTextColor(100, 100, 100);
+        doc.text(`Iletisim: Ilhami ONAY - 0507 416 1424 | Rifat ARSLAN - 0505 304 9918`, 14, doc.internal.pageSize.getHeight() - 20);
+        doc.text(`E-posta: winvestdanismanlik@gmail.com`, 14, doc.internal.pageSize.getHeight() - 15);
+        
+        // Sayfa numarası
+        const pageCount = doc.internal.getNumberOfPages();
+        for (let i = 1; i <= pageCount; i++) {
+          doc.setPage(i);
+          doc.setFontSize(10);
+          doc.setTextColor(150, 150, 150);
+          doc.text(`Sayfa ${i}/${pageCount}`, doc.internal.pageSize.getWidth()/2, doc.internal.pageSize.getHeight() - 10, { align: 'center' });
+        }
+        
+        resolve(doc);
+      });
+    }
+
+    // PDF indirme
+    async function exportToPDF() {
+      if (!fullSchedule || fullSchedule.length === 0) {
+        showAlert("Önce kredi hesaplaması yapmalısınız", "error");
+        return;
+      }
+
+      try {
+        const doc = await generatePDF();
+        const title = `${loanDetails.loanType === 'konut' ? 'Konut' : loanDetails.loanType === 'tasit' ? 'Taşıt' : 'Ticari'} Kredisi Ödeme Planı`;
+        doc.save(`Winvest_${title.replace(/\s+/g, '_')}_${new Date().toISOString().slice(0,10)}.pdf`);
+        showAlert("Ödeme planı PDF olarak indirildi");
+      } catch (error) {
+        showAlert("PDF oluşturulurken bir hata oluştu", "error");
+        console.error(error);
+      }
+    }
+
+    // E-posta gönderim fonksiyonu
+    async function sendEmailWithPDF() {
+      if (!fullSchedule || fullSchedule.length === 0) {
+        showAlert("Önce kredi hesaplaması yapmalısınız", "error");
+        return;
+      }
+
+      if (confirm("Ödeme planını e-posta ile göndermek istediğinize emin misiniz?")) {
+        try {
+          showAlert("PDF oluşturuluyor...", "info");
+          
+          // PDF oluştur
+          const doc = await generatePDF();
+          const pdfBlob = doc.output('blob');
+          const pdfUrl = URL.createObjectURL(pdfBlob);
+          
+          // Mailto linki oluştur
+          const subject = "Winvest Danışmanlık - Kredi Ödeme Planı";
+          const body = `Merhaba,\n\nEkte Winvest Danışmanlık kredi ödeme planımı bulabilirsiniz.\n\nDetaylı bilgi için:\nTelefon: 0507 416 1424 / 0505 304 9918\nE-posta: winvestdanismanlik@gmail.com\n\nSaygılarımla`;
+          
+          // Geçici bir link oluştur ve tıkla
+          const mailtoLink = `mailto:?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+          const a = document.createElement('a');
+          a.href = mailtoLink;
+          a.click();
+          
+          // PDF'i indir (kullanıcı manuel ekleyecek)
+          setTimeout(() => {
+            const downloadLink = document.createElement('a');
+            downloadLink.href = pdfUrl;
+            downloadLink.download = `Winvest_Kredi_Odeme_Plani_${new Date().toISOString().slice(0,10)}.pdf`;
+            downloadLink.click();
+            URL.revokeObjectURL(pdfUrl);
+            
+            showAlert("PDF oluşturuldu. Lütfen e-postanıza el ile ekleyiniz.");
+          }, 1000);
+          
+        } catch (error) {
+          showAlert("E-posta gönderilirken bir hata oluştu", "error");
+          console.error(error);
+        }
+      }
+    }
+  </script>
+</body>
+</html>
