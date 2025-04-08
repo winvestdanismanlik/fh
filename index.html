@@ -34,10 +34,10 @@
     .logo-container {
       display: flex;
       justify-content: center;
-      margin-bottom: 1rem;
+      margin-bottom: 0.5rem;
     }
     .logo-img {
-      height: 80px;
+      height: 60px;
       object-fit: contain;
     }
     .contact-card {
@@ -98,13 +98,12 @@
 <body class="bg-gray-50 text-gray-800">
   <div class="container mx-auto px-4 py-8 max-w-7xl">
     <!-- Başlık ve Logo -->
-    <header class="rich-header text-white py-8 rounded-xl shadow-lg mb-10 border-b-4 gold-border">
+    <header class="rich-header text-white py-3 rounded-xl shadow-lg mb-8 border-b-4 gold-border">
       <div class="container mx-auto px-6 text-center">
         <div class="logo-container">
           <img src="logo.png" alt="Winvest Danışmanlık Logo" class="logo-img">
         </div>
-        <h1 class="text-3xl font-bold mb-3">Kredi Hesaplama Aracı</h1>
-        
+        <h1 class="text-xl font-bold mb-2">Kredi Hesaplama Aracı</h1>
       </div>
     </header>
 
@@ -182,13 +181,17 @@
                 <span class="text-gray-600">Yıllık Maliyet Oranı:</span>
                 <span id="annualCostRate" class="font-semibold">0,00%</span>
               </div>
+              <div class="flex justify-between">
+                <span class="text-gray-600">Ortalama Vade (Gün):</span>
+                <span id="averageTermDays" class="font-semibold">0</span>
+              </div>
               <div id="taxesInfo" class="pt-3 mt-3 border-t-2 gold-border hidden">
-                <div class="flex justify-between">
+                <div id="kkdfRow" class="flex justify-between hidden">
                   <span class="text-gray-600">KKDF (15%):</span>
                   <span id="kkdfResult" class="font-semibold">0,00</span>
                 </div>
                 <div class="flex justify-between">
-                  <span class="text-gray-600">BSMV (5%):</span>
+                  <span id="bsmvLabel" class="text-gray-600">BSMV (5%):</span>
                   <span id="bsmvResult" class="font-semibold">0,00</span>
                 </div>
               </div>
@@ -431,17 +434,20 @@
 
       let effectiveRate = baseRate;
       const KKDF = 0.15;
-      const BSMV = 0.05;
+      const BSMV_KONUT_TICARI = 0.05;
+      const BSMV_TASIT = 0.15;
       let kkdfAmount = 0;
       let bsmvAmount = 0;
+      let bsmvRateToShow = BSMV_KONUT_TICARI;
 
       if (loanType === "tasit") {
         kkdfAmount = baseRate * KKDF;
-        bsmvAmount = baseRate * BSMV;
-        effectiveRate = baseRate * (1 + KKDF + BSMV);
+        bsmvAmount = baseRate * BSMV_TASIT;
+        effectiveRate = baseRate * (1 + KKDF + BSMV_TASIT);
+        bsmvRateToShow = BSMV_TASIT;
       } else if (loanType === "ticari") {
-        bsmvAmount = baseRate * BSMV;
-        effectiveRate = baseRate * (1 + BSMV);
+        bsmvAmount = baseRate * BSMV_KONUT_TICARI;
+        effectiveRate = baseRate * (1 + BSMV_KONUT_TICARI);
       }
 
       const monthlyPayment = (amount * effectiveRate) / (1 - Math.pow(1 + effectiveRate, -term));
@@ -452,6 +458,9 @@
       const monthlyCostRate = effectiveRate * 100;
       const annualCostRate = (Math.pow(1 + effectiveRate, 12) - 1) * 100;
 
+      // Ortalama vade hesaplama (gün cinsinden)
+      const averageTermDays = Math.round((term+1)/2 * 30); // Ortalama ay uzunluğu 30 gün
+
       // Sonuçları göster
       document.getElementById("results").classList.remove("hidden");
       document.getElementById("monthlyPaymentResult").textContent = `${formatNumber(monthlyPayment)}`;
@@ -459,13 +468,24 @@
       document.getElementById("totalInterestResult").textContent = `${formatNumber(totalInterest)}`;
       document.getElementById("monthlyCostRate").textContent = `${monthlyCostRate.toFixed(2)}%`;
       document.getElementById("annualCostRate").textContent = `${annualCostRate.toFixed(2)}%`;
+      document.getElementById("averageTermDays").textContent = `${averageTermDays}`;
 
       // Vergi bilgilerini göster/gizle
       const taxesInfo = document.getElementById("taxesInfo");
+      const kkdfRow = document.getElementById("kkdfRow");
+      const bsmvLabel = document.getElementById("bsmvLabel");
+      
       if (loanType === "tasit" || loanType === "ticari") {
         taxesInfo.classList.remove("hidden");
-        document.getElementById("kkdfResult").textContent = `${formatNumber(totalInterest * KKDF)}`;
-        document.getElementById("bsmvResult").textContent = `${formatNumber(totalInterest * BSMV)}`;
+        if (loanType === "tasit") {
+          kkdfRow.classList.remove("hidden");
+          document.getElementById("kkdfResult").textContent = `${formatNumber(totalInterest * KKDF)}`;
+          bsmvLabel.textContent = `BSMV (${BSMV_TASIT*100}%):`;
+        } else {
+          kkdfRow.classList.add("hidden");
+          bsmvLabel.textContent = `BSMV (${BSMV_KONUT_TICARI*100}%):`;
+        }
+        document.getElementById("bsmvResult").textContent = `${formatNumber(totalInterest * (loanType === "tasit" ? BSMV_TASIT : BSMV_KONUT_TICARI))}`;
       } else {
         taxesInfo.classList.add("hidden");
       }
@@ -481,9 +501,9 @@
 
         if (loanType === "tasit") {
           kkdfThisMonth = interestPayment * KKDF;
-          bsmvThisMonth = interestPayment * BSMV;
+          bsmvThisMonth = interestPayment * BSMV_TASIT;
         } else if (loanType === "ticari") {
-          bsmvThisMonth = interestPayment * BSMV;
+          bsmvThisMonth = interestPayment * BSMV_KONUT_TICARI;
         }
 
         const totalInterestWithTaxes = interestPayment + kkdfThisMonth + bsmvThisMonth;
@@ -516,8 +536,10 @@
         totalInterest,
         monthlyCostRate,
         annualCostRate,
+        averageTermDays,
         kkdfTotal: loanType === "tasit" ? totalInterest * KKDF : 0,
-        bsmvTotal: loanType === "tasit" || loanType === "ticari" ? totalInterest * BSMV : 0,
+        bsmvTotal: loanType === "tasit" ? totalInterest * BSMV_TASIT : (loanType === "ticari" ? totalInterest * BSMV_KONUT_TICARI : 0),
+        bsmvRate: loanType === "tasit" ? BSMV_TASIT : BSMV_KONUT_TICARI,
         calculationDate: new Date().toLocaleDateString('tr-TR', { 
           day: '2-digit', 
           month: '2-digit', 
@@ -562,10 +584,11 @@
         doc.text(`Kredi Tutari: ${formatNumber(loanDetails.amount)} TL`, 14, 38);
         doc.text(`Kar Orani: %${loanDetails.monthlyRate.toFixed(2)}`, 14, 45);
         doc.text(`Vade: ${loanDetails.term} ay`, 14, 52);
+        doc.text(`Ortalama Vade: ${loanDetails.averageTermDays} gün`, 14, 59);
         
         // Maliyet oranları
-        doc.text(`Aylik Maliyet Orani: %${loanDetails.monthlyCostRate.toFixed(2)}`, 14, 59);
-        doc.text(`Yillik Maliyet Orani: %${loanDetails.annualCostRate.toFixed(2)}`, 14, 66);
+        doc.text(`Aylik Maliyet Orani: %${loanDetails.monthlyCostRate.toFixed(2)}`, 14, 66);
+        doc.text(`Yillik Maliyet Orani: %${loanDetails.annualCostRate.toFixed(2)}`, 14, 73);
         
         // Özet bilgiler
         doc.text(`Aylik Taksit: ${formatNumber(loanDetails.monthlyPayment)} TL`, 105, 38);
@@ -573,9 +596,9 @@
         doc.text(`Toplam Kar: ${formatNumber(loanDetails.totalInterest)} TL`, 105, 52);
         
         if (loanDetails.loanType !== 'konut') {
-          doc.text(`BSMV: ${formatNumber(loanDetails.bsmvTotal)} TL`, 105, 59);
+          doc.text(`BSMV (${loanDetails.bsmvRate*100}%): ${formatNumber(loanDetails.bsmvTotal)} TL`, 105, 59);
           if (loanDetails.loanType === 'tasit') {
-            doc.text(`KKDF: ${formatNumber(loanDetails.kkdfTotal)} TL`, 105, 66);
+            doc.text(`KKDF (15%): ${formatNumber(loanDetails.kkdfTotal)} TL`, 105, 66);
           }
         }
         
@@ -592,7 +615,7 @@
         ]);
         
         doc.autoTable({
-          startY: 75,
+          startY: 80,
           head: headers,
           body: data,
           headStyles: {
@@ -604,7 +627,7 @@
           alternateRowStyles: {
             fillColor: [245, 245, 245]
           },
-          margin: { top: 75 },
+          margin: { top: 80 },
           styles: {
             cellPadding: 4,
             fontSize: 9,
